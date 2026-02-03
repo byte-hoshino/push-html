@@ -219,7 +219,7 @@ function copyText(){
 
 /* ===== キーボードUI操作 ===== */
 document.addEventListener("keydown",e=>{
-  const map={1:"dance",2:"shoot",3:"fashion",4:"scene",5:"play",6:"go"};
+  const map={1:"dance",2:"shoot",3:"fashion",4:"scene",5:"play",6:"go",7:"living"};
   if(map[e.key]) setCategory(map[e.key]);
   if(e.key==="Enter") copyText();
 });
@@ -227,7 +227,7 @@ document.addEventListener("keydown", e => {
 
   /* --- 詳細（QWERTY）--- */
   const detailKeys = {
-    q: 0, w: 1, e: 2, r: 3, t: 4, y: 5
+    q: 0, w: 1, e: 2, r: 3, t: 4, y: 5, u: 6, i: 7, o: 8, p: 9
   };
 
   if (detailKeys[e.key] !== undefined && state.category) {
