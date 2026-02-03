@@ -119,8 +119,6 @@ function setCategory(cat,e){
 
   if(e){
     clearActive("category");
-    e.target.classList.add("active");
-  } else {
     const index=categories.indexOf(cat);
     highlightByIndex("category",index);
   }
