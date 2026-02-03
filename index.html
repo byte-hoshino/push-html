@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>PUSHテキストジェネレーター完成版</title>
+
+<style>
+body { font-family: sans-serif; padding: 20px; }
+h3 { margin-top: 20px; }
+button {
+  margin: 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #fd9aac;
+  cursor: pointer;
+}
+button.active {
+  background: #ffb6c1;
+  border-color: #ff69b4;
+}
+textarea {
+  width: 520px;
+  height: 90px;
+  margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<h2>PUSHテキストジェネレーター完成版</h2>
+
+<h3>① ジャンル</h3>
+<div id="category">
+  <button onclick="setCategory('dance', event)">踊ってみた</button>
+  <button onclick="setCategory('shoot', event)">撮ってみた</button>
+  <button onclick="setCategory('fashion', event)">コーデ紹介</button>
+  <button onclick="setCategory('scene', event)">風景</button>
+  <button onclick="setCategory('play', event)">演奏してみた</button>
+  <button onclick="setCategory('go', event)">行ってみた</button>
+  <button onclick="setCategory('living', event)">暮らし</button>
+
+</div>
+
+<h3>② 詳細</h3>
+<div id="detail"></div>
+
+<h3>③ 語尾</h3>
+<div id="tone"></div>
+
+<textarea id="output"></textarea>
+<button onclick="copyText()">コピー</button>
+
+<script>
+let state={category:"",detail:"",tone:0};
+
+const categories=["dance","shoot","fashion","scene","play","go"];
+
+const detailOptions={
+  dance:["1人で","2人で","3人で","4人で","みんなで","可愛く","音楽に合わせて","M!lkの曲で"],
+  shoot:["自分を","彼氏を","彼女を","友達を","ライブを","猫を","犬を"],
+  fashion:["今日の","デート前の","おそろ","着回し","流行りの","急いで完成した"],
+  scene:["雪景色","夜景","空","海","綺麗な海と太陽","海に沈む夕日"],
+  play:["ギターを","ピアノを","ドラムを","ベースを"],
+  go:["イベントに","コンサートに","ライブに","推しに会いに","おしゃれなカフェに"],
+  living:["猫のいる","犬のいる","子供のいる","のんびりとした","おしゃれな"]
+
+};
+
+const toneEndings=[
+  {label:"なし",type:"none"},
+  {label:"🎀",type:"emoji",text:"🎀✨"},
+  {label:"照れ",type:"emoji",text:"///"},
+  {label:"🔥",type:"emoji",text:"🔥"},
+  {label:"😎",type:"emoji",text:"😎"},
+  {label:"🥺",type:"emoji",text:"🥺"},
+  {label:"草",type:"grass"},
+  {label:"滅",type:"destroy"},
+  {label:"関西弁",type:"kansai"},
+  {label:"🎲ギャルランダム",type:"gyaru"},
+  {label:"🔥熱血🔥",type:"hot"}
+];
+
+const kansaiMap={
+  dance:"で",shoot:"で",fashion:"やで",
+  scene:"んやけどな",play:"で",go:"で",living:""
+};
+
+const gyaruRandom=[
+  "世界獲れた","秒で優勝","普通に天才","可愛すぎて無理","全員優勝",
+  "意味わからんくらい良い","情緒どっかいった","やばみ","やばいンゴ",
+  "これは勝ち","なんか伝説始まった","普通に神回","マジヤバかった💖",
+  "最高すぎて自分で見返してる","これは保存案件","脳内拍手喝采",
+  "想像超えてきた","好きすぎる","完全に成功","普通に優勝してた","謎に感動してる","正解引いた","思った以上だった","一周回って好き","これはもう事件","完成度高すぎ"
+];
+
+const hotbloodRandom=[
+"...‼️","って言ってんだろッ‼️","‼️"
+];
+
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+/* ===== UI共通 ===== */
+function clearActive(id){
+  document.querySelectorAll(`#${id} button`)
+    .forEach(b=>b.classList.remove("active"));
+}
+
+function highlightByIndex(id,index){
+  clearActive(id);
+  const btn=document.querySelectorAll(`#${id} button`)[index];
+  if(btn) btn.classList.add("active");
+}
+
+/* ===== ジャンル選択 ===== */
+function setCategory(cat,e){
+  state.category=cat;
+  state.detail="";
+  state.tone=0;
+
+  if(e){
+    clearActive("category");
+    e.target.classList.add("active");
+  } else {
+    const index=categories.indexOf(cat);
+    highlightByIndex("category",index);
+  }
+
+  renderDetails();
+  renderToneButtons();
+  generate();
+}
+
+/* ===== 詳細 ===== */
+function renderDetails(){
+  const d=document.getElementById("detail");
+  d.innerHTML="";
+  detailOptions[state.category].forEach((v,i)=>{
+    const b=document.createElement("button");
+    b.innerText=v;
+    b.onclick=e=>{
+      state.detail=v;
+      highlightByIndex("detail",i);
+      generate();
+    };
+    d.appendChild(b);
+  });
+}
+
+/* ===== 語尾 ===== */
+function renderToneButtons(){
+  const t=document.getElementById("tone");
+  t.innerHTML="";
+  toneEndings.forEach((v,i)=>{
+    const b=document.createElement("button");
+    b.innerText=v.label;
+    b.onclick=e=>{
+      state.tone=i;
+      highlightByIndex("tone",i);
+      generate();
+    };
+    t.appendChild(b);
+  });
+}
+
+/* ===== 生成ロジック（変更なし） ===== */
+function generate(){
+  if(!state.category||!state.detail)return;
+  const tone=toneEndings[state.tone];
+  let r="";
+
+  if(state.category==="scene"){
+    if(tone.type==="grass") r=`${state.detail}が綺麗すぎて草`;
+    else if(tone.type==="destroy") r=`${state.detail}が綺麗すぎて滅`;
+    else if(tone.type==="gyaru") r=`${state.detail}が綺麗すぎて${rand(gyaruRandom)}`;
+    else if(tone.type==="hot") r=`${state.detail}が美しかった${rand(hotbloodRandom)}`;
+    else if(tone.type==="kansai") r=`${state.detail}が綺麗だった${kansaiMap.scene}`;
+    else r=`${state.detail}が綺麗だった${tone.text||""}`;
+  } else {
+    let base="";
+    if(state.category==="dance") base=`${state.detail}踊ってみた`;
+    if(state.category==="shoot") base=`${state.detail}撮ってみた`;
+    if(state.category==="fashion") base=`${state.detail}コーデ紹介`;
+    if(state.category==="play") base=`${state.detail}演奏してみた`;
+    if(state.category==="go") base=`${state.detail}行ってみた`;
+    if(state.category==="living") base=`${state.detail}暮らし`;
+
+    if(state.category==="fashion"&&(tone.type==="grass"||tone.type==="destroy"||tone.type==="gyaru"||tone.type==="hot")){
+      if(tone.type==="grass") r=`${state.detail}コーデ紹介したら草`;
+      else if(tone.type==="destroy") r=`${state.detail}コーデ紹介したら滅`;
+      else if(tone.type==="gyaru") r=`${state.detail}コーデ紹介したら${rand(gyaruRandom)}`;
+      else r=`${state.detail}コーデ紹介した結果${rand(hotbloodRandom)}`;
+    } else {
+      if(tone.type==="grass") r=base+"ら草";
+      else if(tone.type==="destroy") r=base+"ら滅";
+      else if(tone.type==="gyaru") r=base+"ら"+rand(gyaruRandom);
+      else if(tone.type==="hot") r=base+"結果"+rand(hotbloodRandom);
+      else if(tone.type==="kansai") r=base+kansaiMap[state.category];
+      else r=base+(tone.text||"");
+    }
+    if(state.category==="living"){
+      if(tone.type==="grass") r=`${state.detail}暮らしが最高すぎて草`;
+      else if(tone.type==="destroy") r=`${state.detail}暮らしが最高すぎて滅`;
+      else if(tone.type==="gyaru") r=`${state.detail}暮らしが${rand(gyaruRandom)}`;
+      else if(tone.type==="hot") r=`${state.detail}暮らし${rand(hotbloodRandom)}`;
+      else if(tone.type==="kansai") r=`${state.detail}暮らしやで${kansaiMap.living}`;
+      else r=`${state.detail}暮らし${tone.text||""}`;
+    } else {
+    }
+}
+  output.value=r;
+}
+
+/* ===== コピー ===== */
+function copyText(){
+  output.select();
+  document.execCommand("copy");
+  window.getSelection().removeAllRanges();
+}
+
+/* ===== キーボードUI操作 ===== */
+document.addEventListener("keydown",e=>{
+  const map={1:"dance",2:"shoot",3:"fashion",4:"scene",5:"play",6:"go"};
+  if(map[e.key]) setCategory(map[e.key]);
+  if(e.key==="Enter") copyText();
+});
+document.addEventListener("keydown", e => {
+
+  /* --- 詳細（QWERTY）--- */
+  const detailKeys = {
+    q: 0, w: 1, e: 2, r: 3, t: 4, y: 5
+  };
+
+  if (detailKeys[e.key] !== undefined && state.category) {
+    const idx = detailKeys[e.key];
+    const options = detailOptions[state.category];
+    if (options[idx]) {
+      state.detail = options[idx];
+      highlightByIndex("detail", idx);
+      generate();
+    }
+  }
+
+  /* --- 語尾（ASDFGHJK）--- */
+  const toneKeys = {
+    a: 0, s: 1, d: 2, f: 3,
+    g: 4, h: 5, j: 6, k: 7, l: 8, z: 9, x: 10, c: 11
+  };
+
+  if (toneKeys[e.key] !== undefined) {
+    const idx = toneKeys[e.key];
+    if (toneEndings[idx]) {
+      state.tone = idx;
+      highlightByIndex("tone", idx);
+      generate();
+    }
+  }
+});
+</script>
+
+</body>
+</html>
