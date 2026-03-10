@@ -2,257 +2,746 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>PUSHテキストジェネレーター完成版</title>
+<title>鬼アーカイブ</title>
 
 <style>
-body { font-family: sans-serif; padding: 20px; }
-h3 { margin-top: 20px; }
-button {
-  margin: 4px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #fd9aac;
-  cursor: pointer;
+
+body{
+background:linear-gradient(180deg,#140028,#2a0055);
+color:white;
+font-family:sans-serif;
+text-align:center;
+overflow-x:hidden;
 }
-button.active {
-  background: #ffb6c1;
-  border-color: #ff69b4;
+
+#title{
+width:500px;
+margin-top:20px;
 }
-textarea {
-  width: 520px;
-  height: 90px;
-  margin-top: 10px;
+
+button{
+background:linear-gradient(45deg,#8a2be2,#ff00ff);
+border:none;
+padding:15px 30px;
+font-size:20px;
+border-radius:10px;
+color:white;
+cursor:pointer;
+margin:10px;
+transition:0.2s;
 }
+
+button:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px violet;
+}
+
+#results{
+display:flex;
+justify-content:center;
+gap:20px;
+margin-top:30px;
+}
+
+.card{
+width:170px;
+height:240px;
+perspective:1000px;
+}
+
+.inner{
+width:100%;
+height:100%;
+position:relative;
+transform-style:preserve-3d;
+transition:transform 0.8s;
+}
+
+.flip{
+transform:rotateY(180deg);
+}
+
+.front,.back{
+position:absolute;
+width:100%;
+height:100%;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+backface-visibility:hidden;
+}
+
+.front{
+background:#222;
+font-size:40px;
+}
+
+.back{
+background:#333;
+transform:rotateY(180deg);
+padding:10px;
+}
+
+.charImg{
+width:110px;
+height:110px;
+object-fit:contain;
+margin-bottom:5px;
+
+}
+
+.ssr{
+box-shadow:0 0 30px gold;
+background:linear-gradient(135deg,#444,#b8860b);
+}
+
+.ur{
+animation:rainbow 2s infinite linear;
+box-shadow:
+0 0 20px cyan,
+0 0 40px cyan,
+0 0 60px cyan;
+background:linear-gradient(135deg,#222,#00ffff);
+}
+
+.or{
+animation:explode 1s infinite;
+box-shadow:
+0 0 30px red,
+0 0 60px red,
+0 0 90px orange;
+background:linear-gradient(135deg,#300,#ff0000);
+}
+
+.ur{animation:rainbow 2s infinite linear;}
+
+
+@keyframes rainbow{
+0%{filter:hue-rotate(0deg)}
+100%{filter:hue-rotate(360deg)}
+}
+
+.or{animation:explode 1s infinite;}
+
+@keyframes explode{
+0%{box-shadow:0 0 10px red}
+50%{box-shadow:0 0 60px red}
+100%{box-shadow:0 0 10px red}
+}
+
+#collection{
+margin-top:40px;
+display:grid;
+grid-template-columns:repeat(6,110px);
+justify-content:center;
+gap:10px;
+}
+
+.slot{
+background:#333;
+height:110px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+border-radius:6px;
+font-size:12px;
+}
+
+.slot img{
+width:60px;
+height:60px;
+object-fit:contain;
+}
+
+.lock{opacity:0.25;}
+
+#rate{
+margin-top:10px;
+font-size:18px;
+}
+
+#effect{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:999;
+overflow:hidden;
+}
+
+.effectChar{
+width:420px;
+animation:pop 0.6s ease;
+z-index:2;
+}
+
+@keyframes pop{
+0%{transform:scale(0);filter:brightness(4)}
+70%{transform:scale(1.2)}
+100%{transform:scale(1)}
+}
+
+.flash{
+position:absolute;
+width:100%;
+height:100%;
+background:white;
+opacity:0;
+animation:flash 0.4s;
+}
+
+@keyframes flash{
+0%{opacity:1}
+100%{opacity:0}
+}
+
+.rainbowBurst{
+position:absolute;
+width:120%;
+height:120%;
+background:conic-gradient(red,orange,yellow,green,cyan,blue,violet,red);
+opacity:0.4;
+animation:spin 3s linear infinite;
+}
+
+@keyframes spin{
+0%{transform:rotate(0)}
+100%{transform:rotate(360deg)}
+}
+
+.explosion{
+position:absolute;
+width:100%;
+height:100%;
+background:radial-gradient(circle,red,transparent);
+opacity:0.6;
+animation:explode2 1s;
+}
+
+@keyframes explode2{
+0%{transform:scale(0)}
+100%{transform:scale(2)}
+}
+
+.shake{animation:shake 0.5s;}
+
+@keyframes shake{
+0%{transform:translate(0)}
+25%{transform:translate(-10px,5px)}
+50%{transform:translate(10px,-5px)}
+75%{transform:translate(-10px,5px)}
+100%{transform:translate(0)}
+}
+
+.particle{
+position:absolute;
+width:8px;
+height:8px;
+background:white;
+border-radius:50%;
+animation:particleMove 1s linear forwards;
+}
+
+@keyframes particleMove{
+0%{transform:translate(0,0);opacity:1;}
+100%{transform:translate(var(--x),var(--y));opacity:0;}
+}
+
+.newBadge{
+color:gold;
+font-weight:bold;
+text-shadow:
+0 0 5px gold,
+0 0 10px gold,
+0 0 20px gold;
+animation:newGlow 1s infinite alternate;
+}
+
+@keyframes newGlow{
+0%{text-shadow:0 0 5px gold}
+100%{text-shadow:0 0 25px gold}
+}
+
+#stats{
+display:flex;
+justify-content:center;
+gap:40px;
+margin-top:20px;
+align-items:center;
+}
+
+.statBox{
+background:linear-gradient(45deg,#222,#444);
+padding:15px 25px;
+border-radius:10px;
+box-shadow:0 0 15px violet;
+}
+
+.statLabel{
+font-size:14px;
+opacity:0.7;
+}
+
+.statValue{
+font-size:28px;
+font-weight:bold;
+color:#ffd700;
+}
+
+#dex{
+margin-top:150px;
+}
+
 </style>
 </head>
+
 <body>
 
-<h2>PUSHテキストジェネレーター完成版</h2>
+<div id="effect"></div>
 
-<h3>① ジャンル</h3>
-<div id="category">
-  <button onclick="setCategory('dance', event)">踊ってみた</button>
-  <button onclick="setCategory('shoot', event)">撮ってみた</button>
-  <button onclick="setCategory('fashion', event)">コーデ紹介</button>
-  <button onclick="setCategory('scene', event)">風景</button>
-  <button onclick="setCategory('play', event)">演奏してみた</button>
-  <button onclick="setCategory('go', event)">行ってみた</button>
-  <button onclick="setCategory('living', event)">暮らし</button>
+<h1><img src="title.png" id="title"></h1>
+
+<button onclick="draw(1)">1回ガチャ</button>
+<button onclick="draw(10)">10連ガチャ</button>
+
+<div id="results"></div>
+
+
+<div id="dex">
+
+<h2>図鑑</h2>
+
+<div id="rate"></div>
+<div id="stats">
+
+<div class="statBox">
+<div class="statLabel">総ガチャ回数</div>
+<div id="pullCount" class="statValue">0</div>
+</div>
+
+<div class="statBox">
+<div class="statLabel">SSR確定チケット</div>
+<div id="ticketCount" class="statValue">0</div>
+</div>
+
+<button onclick="ticketGacha()">SSR確定ガチャ</button>
+
+</div>
+<div id="collection"></div>
+
+
+
+<script>
+
+const characters=[
+
+{name:"おに",rarity:"N",img:"character.png"},
+{name:"あの頃のおに",rarity:"N",img:"young.png"},
+{name:"おに猫",rarity:"N",img:"neko.png"},
+{name:"おに犬",rarity:"N",img:"inu.png"},
+{name:"新卒おに",rarity:"N",img:"suits.png"},
+{name:"わけありおに",rarity:"N",img:"wakeari.png"},
+{name:"となかいおに",rarity:"N",img:"tonakai.png"},
+{name:"七五三おに",rarity:"N",img:"7.png"},
+{name:"バレンタインおに",rarity:"N",img:"choco.png"},
+{name:"クリスマスおに",rarity:"N",img:"christmas.png"},
+{name:"社畜おに",rarity:"N",img:"busy.png"},
+{name:"おにカフェ店員",rarity:"N",img:"coffee.png"},
+{name:"おに画家",rarity:"N",img:"painter.png"},
+{name:"おにとり",rarity:"N",img:"tori.png"},
+{name:"おにマッチョ",rarity:"N",img:"kinniku.png"},
+{name:"おに棋士",rarity:"N",img:"kishi.png"},
+{name:"おにチャイナ",rarity:"N",img:"china.png"},
+{name:"おにバントマン",rarity:"N",img:"band.png"},
+{name:"おにメカニック",rarity:"N",img:"meka.png"},
+{name:"おにシェフ",rarity:"N",img:"chef.png"},
+{name:"おに消防士",rarity:"N",img:"fire.png"},
+{name:"おに転売ヤー",rarity:"N",img:"tenbai.png"},
+{name:"オタクおに",rarity:"N",img:"otaku.png"},
+{name:"ゾンビおに",rarity:"N",img:"zombi.png"},
+{name:"深海おに",rarity:"N",img:"shinkai.png"},
+
+
+
+
+
+
+{name:"おに宇宙飛行士",rarity:"R",img:"sora.png"},
+{name:"おにナイト",rarity:"R",img:"knights.png"},
+{name:"サイバーおに",rarity:"R",img:"cyber.png"},
+{name:"ゆめかわおに",rarity:"R",img:"hime.png"},
+{name:"タイおに",rarity:"R",img:"thai.png"},
+{name:"おにインド",rarity:"R",img:"indo.png"},
+{name:"おにインド2",rarity:"R",img:"indo2.png"},
+{name:"エジプトおに",rarity:"R",img:"egypt.png"},
+{name:"おにパンク",rarity:"R",img:"punk.png"},
+{name:"おにマジシャン",rarity:"R",img:"magic.png"},
+{name:"おにレーサー",rarity:"R",img:"Racer.png"},
+{name:"名探偵おに",rarity:"R",img:"tantei.png"},
+{name:"鬼塚",rarity:"R",img:"onizuka.png"},
+{name:"DJおに",rarity:"R",img:"dj.png"},
+{name:"迷惑配信者",rarity:"R",img:"meiwaku.png"},
+
+
+
+
+{name:"ホスト",rarity:"SR",img:"host.png"},
+{name:"鬼武将",rarity:"SR",img:"busho.png"},
+{name:"ゴスロリおに",rarity:"SR",img:"gosurori.png"},
+{name:"オニタン",rarity:"SR",img:"apex.png"},
+{name:"タキシードおに",rarity:"SR",img:"Tuxedo.png"},
+{name:"オニロット",rarity:"SR",img:"gokuu.png"},
+{name:"おにまーきゅりー",rarity:"SR",img:"sailor.png"},
+{name:"進撃の鬼",rarity:"SR",img:"shin.png"},
+{name:"フィクサー",rarity:"SR",img:"fixer.png"},
+{name:"名探偵",rarity:"SR",img:"meitan.png"},
+{name:"おにバイキング",rarity:"SR",img:"viking.png"},
+
+
+
+
+
+
+{name:"新世界の鬼",rarity:"SSR",img:"note.png"},
+{name:"オニピカソ",rarity:"SSR",img:"pikaso.png"},
+{name:"はんしゃおに",rarity:"SSR",img:"yakuza.png"},
+{name:"ライバーおに",rarity:"SSR",img:"tiktok.png"},
+{name:"特別課外活動おに",rarity:"SSR",img:"persona.png"},
+{name:"聖杯のおに",rarity:"SSR",img:"fate.png"},
+{name:"おに娘",rarity:"SSR",img:"uammu.png"},
+{name:"鬼将軍",rarity:"SSR",img:"samurai.png"},
+{name:"鬼船長",rarity:"SSR",img:"pirates.png"},
+{name:"鬼団長",rarity:"SSR",img:"circus.png"},
+
+
+
+
+{name:"おにメイド",rarity:"UR",img:"maid.png"},
+{name:"おにガキ",rarity:"UR",img:"mesugaki.png"},
+{name:"おにエンジェル",rarity:"UR",img:"angel.png"},
+{name:"おにデビル",rarity:"UR",img:"devil.png"},
+{name:"オニサタン",rarity:"SSR",img:"satan.png"},
+{name:"タイムトラベラーおに",rarity:"UR",img:"toki.png"},
+{name:"成金おに",rarity:"UR",img:"oninari.png"},
+{name:"オニモンマスター",rarity:"UR",img:"satoshi.png"},
+
+
+
+{name:"鬼神オリジン",rarity:"OR",img:"origin.gif"}
+
+]
+
+const rates={
+N:62,
+R:28,
+SR:5,
+SSR:4.7,
+UR:0.25,
+OR:0.05
+}
+
+let collection=JSON.parse(localStorage.getItem("oniCollection"))||[]
+let totalPulls = Number(localStorage.getItem("oniTotalPulls")) || 0
+let ssrTickets = Number(localStorage.getItem("oniTickets")) || 0
+function getRarity(){
+
+let rand=Math.random()*100
+let sum=0
+
+for(let r in rates){
+sum+=rates[r]
+if(rand<sum)return r
+}
+
+}
+
+function getChar(){
+
+let rarity=getRarity()
+
+let pool=characters.filter(c=>c.rarity==rarity)
+
+return pool[Math.floor(Math.random()*pool.length)]
+
+}
+
+function draw(count){
+
+const results=document.getElementById("results")
+results.innerHTML=""
+
+let pulled=[]
+
+// ★3連のとき高速化
+let interval = count===10 ? 250 : 700
+let flipSpeed = count===10 ? 80 : 200
+
+for(let i=0;i<count;i++){
+
+setTimeout(()=>{
+
+let char=getChar()
+let isNew = !collection.includes(char.name)
+totalPulls++
+
+if(totalPulls % 100 === 0){
+ssrTickets++
+alert("SSR以上確定チケットを獲得！")
+}
+
+localStorage.setItem("oniTotalPulls",totalPulls)
+localStorage.setItem("oniTickets",ssrTickets)
+
+updateStats()
+pulled.push(char)
+
+if(!collection.includes(char.name)){
+collection.push(char.name)
+localStorage.setItem("oniCollection",JSON.stringify(collection))
+}
+
+let card=document.createElement("div")
+card.className="card"
+
+card.innerHTML=`
+
+<div class="inner">
+
+<div class="back ${char.rarity.toLowerCase()}">
+
+<img src="${char.img}" class="charImg">
+<h3>${char.rarity}</h3>
+<p>${char.name}</p>
+${isNew ? '<div class="newBadge">NEW</div>' : ''}
+</div>
 
 </div>
 
-<h3>② 詳細</h3>
-<div id="detail"></div>
+`
 
-<h3>③ 語尾</h3>
-<div id="tone"></div>
+results.appendChild(card)
 
-<textarea id="output"></textarea>
-<button onclick="copyText()">コピー</button>
+// ★めくり速度変更
+setTimeout(()=>{
+card.querySelector(".inner").classList.add("flip")
+},flipSpeed)
 
-<script>
-let state={category:"",detail:"",tone:0};
+updateCollection()
 
-const categories=["dance","shoot","fashion","scene","play","go","living"];
+// 最後のカードだけ演出
+if(i===count-1){
 
-const detailOptions={
-  dance:["1人で","2人で","3人で","4人で","みんなで","可愛く","音楽に合わせて","M!lkの曲で"],
-  shoot:["自分を","彼氏を","彼女を","友達を","ライブを","猫を","犬を"],
-  fashion:["今日の","デート前の","おそろ","着回し","流行りの","急いで完成した"],
-  scene:["雪景色","夜景","空","海","綺麗な海と太陽","海に沈む夕日"],
-  play:["ギターを","ピアノを","ドラムを","ベースを"],
-  go:["イベントに","コンサートに","ライブに","推しに会いに","おしゃれなカフェに"],
-  living:["猫のいる","犬のいる","子供のいる","のんびりとした","おしゃれな"]
+setTimeout(()=>{
 
-};
+let rare=getHighestRarity(pulled)
+playEffect(rare)
 
-const toneEndings=[
-  {label:"なし",type:"none"},
-  {label:"🎀",type:"emoji",text:"🎀✨"},
-  {label:"照れ",type:"emoji",text:"///"},
-  {label:"🔥",type:"emoji",text:"🔥"},
-  {label:"😎",type:"emoji",text:"😎"},
-  {label:"🥺",type:"emoji",text:"🥺"},
-  {label:"草",type:"grass"},
-  {label:"滅",type:"destroy"},
-  {label:"関西弁",type:"kansai"},
-  {label:"🎲ギャルランダム",type:"gyaru"},
-  {label:"🔥熱血🔥",type:"hot"}
-];
+},300)
 
-const kansaiMap={
-  dance:"で",shoot:"で",fashion:"やで",
-  scene:"んやけどな",play:"で",go:"で",living:""
-};
-
-const gyaruRandom=[
-  "世界獲れた","秒で優勝","普通に天才","可愛すぎて無理","全員優勝",
-  "意味わからんくらい良い","情緒どっかいった","やばみ","やばいンゴ",
-  "これは勝ち","なんか伝説始まった","普通に神回","マジヤバかった💖",
-  "最高すぎて自分で見返してる","これは保存案件","脳内拍手喝采",
-  "想像超えてきた","好きすぎる","完全に成功","普通に優勝してた","謎に感動してる","正解引いた","思った以上だった","一周回って好き","これはもう事件","完成度高すぎ"
-];
-
-const hotbloodRandom=[
-"...‼️","って言ってんだろッ‼️","‼️"
-];
-
-function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
-
-/* ===== UI共通 ===== */
-function clearActive(id){
-  document.querySelectorAll(`#${id} button`)
-    .forEach(b=>b.classList.remove("active"));
 }
 
-function highlightByIndex(id,index){
-  clearActive(id);
-  const btn=document.querySelectorAll(`#${id} button`)[index];
-  if(btn) btn.classList.add("active");
+},i*interval)
+
 }
 
-/* ===== ジャンル選択 ===== */
-function setCategory(cat,e){
-  state.category=cat;
-  state.detail="";
-  state.tone=0;
-
-  if(e){
-    clearActive("category");
-    const index=categories.indexOf(cat);
-    highlightByIndex("category",index);
-  }
-
-  renderDetails();
-  renderToneButtons();
-  generate();
 }
 
-/* ===== 詳細 ===== */
-function renderDetails(){
-  const d=document.getElementById("detail");
-  d.innerHTML="";
-  detailOptions[state.category].forEach((v,i)=>{
-    const b=document.createElement("button");
-    b.innerText=v;
-    b.onclick=e=>{
-      state.detail=v;
-      highlightByIndex("detail",i);
-      generate();
-    };
-    d.appendChild(b);
-  });
+function getHighestRarity(chars){
+
+const order={
+N:1,
+R:2,
+SR:3,
+SSR:4,
+UR:5,
+OR:6
 }
 
-/* ===== 語尾 ===== */
-function renderToneButtons(){
-  const t=document.getElementById("tone");
-  t.innerHTML="";
-  toneEndings.forEach((v,i)=>{
-    const b=document.createElement("button");
-    b.innerText=v.label;
-    b.onclick=e=>{
-      state.tone=i;
-      highlightByIndex("tone",i);
-      generate();
-    };
-    t.appendChild(b);
-  });
+let best=chars[0]
+
+chars.forEach(c=>{
+if(order[c.rarity] > order[best.rarity]){
+best=c
+}
+})
+
+return best
+
 }
 
-/* ===== 生成ロジック（変更なし） ===== */
-function generate(){
-  if(!state.category||!state.detail)return;
-  const tone=toneEndings[state.tone];
-  let r="";
+function playEffect(char){
 
-  if(state.category==="scene"){
-    if(tone.type==="grass") r=`${state.detail}が綺麗すぎて草`;
-    else if(tone.type==="destroy") r=`${state.detail}が綺麗すぎて滅`;
-    else if(tone.type==="gyaru") r=`${state.detail}が綺麗すぎて${rand(gyaruRandom)}`;
-    else if(tone.type==="hot") r=`${state.detail}が美しかった${rand(hotbloodRandom)}`;
-    else if(tone.type==="kansai") r=`${state.detail}が綺麗だった${kansaiMap.scene}`;
-    else r=`${state.detail}が綺麗だった${tone.text||""}`;
-  } else {
-    let base="";
-    if(state.category==="dance") base=`${state.detail}踊ってみた`;
-    if(state.category==="shoot") base=`${state.detail}撮ってみた`;
-    if(state.category==="fashion") base=`${state.detail}コーデ紹介`;
-    if(state.category==="play") base=`${state.detail}演奏してみた`;
-    if(state.category==="go") base=`${state.detail}行ってみた`;
-    if(state.category==="living") base=`${state.detail}暮らし`;
+let effect=document.getElementById("effect")
+effect.innerHTML=""
 
-    if(state.category==="fashion"&&(tone.type==="grass"||tone.type==="destroy"||tone.type==="gyaru"||tone.type==="hot")){
-      if(tone.type==="grass") r=`${state.detail}コーデ紹介したら草`;
-      else if(tone.type==="destroy") r=`${state.detail}コーデ紹介したら滅`;
-      else if(tone.type==="gyaru") r=`${state.detail}コーデ紹介したら${rand(gyaruRandom)}`;
-      else r=`${state.detail}コーデ紹介した結果${rand(hotbloodRandom)}`;
-    } else {
-      if(tone.type==="grass") r=base+"ら草";
-      else if(tone.type==="destroy") r=base+"ら滅";
-      else if(tone.type==="gyaru") r=base+"ら"+rand(gyaruRandom);
-      else if(tone.type==="hot") r=base+"結果"+rand(hotbloodRandom);
-      else if(tone.type==="kansai") r=base+kansaiMap[state.category];
-      else r=base+(tone.text||"");
-    }
-    if(state.category==="living"){
-      if(tone.type==="grass") r=`${state.detail}暮らしが最高すぎて草`;
-      else if(tone.type==="destroy") r=`${state.detail}暮らしが最高すぎて滅`;
-      else if(tone.type==="gyaru") r=`${state.detail}暮らしが${rand(gyaruRandom)}`;
-      else if(tone.type==="hot") r=`${state.detail}暮らし${rand(hotbloodRandom)}`;
-      else if(tone.type==="kansai") r=`${state.detail}暮らしやで${kansaiMap.living}`;
-      else r=`${state.detail}暮らし${tone.text||""}`;
-    } else {
-    }
-}
-  output.value=r;
+if(char.rarity=="SSR"){
+
+effect.innerHTML=`
+<div class="flash"></div>
+<div class="rainbowBurst"></div>
+<img src="${char.img}" class="effectChar">
+`
+
+spawnParticles(60)
+
 }
 
-/* ===== コピー ===== */
-function copyText(){
-  output.select();
-  document.execCommand("copy");
-  window.getSelection().removeAllRanges();
+if(char.rarity=="UR"){
+
+effect.innerHTML=`
+<div class="flash"></div>
+<div class="rainbowBurst"></div>
+<img src="${char.img}" class="effectChar">
+`
+
+document.body.classList.add("shake")
+
+spawnParticles(80)
+
+setTimeout(()=>document.body.classList.remove("shake"),600)
+
 }
 
-/* ===== キーボードUI操作 ===== */
-document.addEventListener("keydown",e=>{
-  const map={1:"dance",2:"shoot",3:"fashion",4:"scene",5:"play",6:"go",7:"living"};
-  if(map[e.key]) setCategory(map[e.key]);
-  if(e.key==="Enter") copyText();
-});
-document.addEventListener("keydown", e => {
+if(char.rarity=="OR"){
 
-  /* --- 詳細（QWERTY）--- */
-  const detailKeys = {
-    q: 0, w: 1, e: 2, r: 3, t: 4, y: 5, u: 6, i: 7, o: 8, p: 9
-  };
+effect.innerHTML=`
+<div class="flash"></div>
+<div class="rainbowBurst"></div>
+<div class="explosion"></div>
+<img src="${char.img}" class="effectChar">
+`
 
-  if (detailKeys[e.key] !== undefined && state.category) {
-    const idx = detailKeys[e.key];
-    const options = detailOptions[state.category];
-    if (options[idx]) {
-      state.detail = options[idx];
-      highlightByIndex("detail", idx);
-      generate();
-    }
-  }
+document.body.classList.add("shake")
 
-  /* --- 語尾（ASDFGHJK）--- */
-  const toneKeys = {
-    a: 0, s: 1, d: 2, f: 3,
-    g: 4, h: 5, j: 6, k: 7, l: 8, z: 9, x: 10, c: 11
-  };
+spawnParticles(150)
 
-  if (toneKeys[e.key] !== undefined) {
-    const idx = toneKeys[e.key];
-    if (toneEndings[idx]) {
-      state.tone = idx;
-      highlightByIndex("tone", idx);
-      generate();
-    }
-  }
-});
+setTimeout(()=>document.body.classList.remove("shake"),1000)
+
+}
+
+setTimeout(()=>effect.innerHTML="",2000)
+
+}
+
+function spawnParticles(count){
+
+let effect=document.getElementById("effect")
+
+for(let i=0;i<count;i++){
+
+let p=document.createElement("div")
+p.className="particle"
+
+let x=(Math.random()*800-400)+"px"
+let y=(Math.random()*800-400)+"px"
+
+p.style.setProperty("--x",x)
+p.style.setProperty("--y",y)
+
+effect.appendChild(p)
+
+}
+
+}
+
+function updateCollection(){
+
+let col=document.getElementById("collection")
+col.innerHTML=""
+
+characters.forEach(c=>{
+
+let div=document.createElement("div")
+div.className="slot"
+
+if(collection.includes(c.name)){
+
+div.innerHTML=`<img src="${c.img}"><br>${c.rarity}<br>${c.name}`
+
+}else{
+
+div.classList.add("lock")
+div.innerHTML="???"
+
+}
+
+col.appendChild(div)
+
+})
+
+let rate=Math.floor(collection.length/characters.length*100)
+
+document.getElementById("rate").innerText=
+"コンプリート率 "+collection.length+" / "+characters.length+" ("+rate+"%)"
+
+}
+
+updateCollection()
+
+function ticketGacha(){
+
+if(ssrTickets<=0){
+alert("チケットがありません")
+return
+}
+
+ssrTickets--
+
+localStorage.setItem("oniTickets",ssrTickets)
+
+const pool = characters.filter(c =>
+c.rarity=="SSR" || c.rarity=="UR" || c.rarity=="OR"
+)
+
+let char = pool[Math.floor(Math.random()*pool.length)]
+
+const results=document.getElementById("results")
+results.innerHTML=""
+
+let card=document.createElement("div")
+card.className="card"
+
+card.innerHTML=`
+
+<div class="inner">
+<div class="back ${char.rarity.toLowerCase()}">
+
+<img src="${char.img}" class="charImg">
+<h3>${char.rarity}</h3>
+<p>${char.name}</p>
+
+</div>
+</div>
+`
+
+results.appendChild(card)
+
+setTimeout(()=>{
+card.querySelector(".inner").classList.add("flip")
+},100)
+
+playEffect(char)
+
+updateStats()
+
+}
+function updateStats(){
+
+document.getElementById("pullCount").innerText = totalPulls
+document.getElementById("ticketCount").innerText = ssrTickets
+
+}
+
+updateStats()
+
 </script>
 
 </body>
